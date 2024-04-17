@@ -1,0 +1,353 @@
+Git简介
+Git的官方网站：http://git-scm.com
+Git是目前世界上最先进的分布式版本控制系统。
+版本控制系统--不但能自动记录每次文件的改动，还可以协作编辑。
+
+集中式和分布式版本控制系统
+集中式
+版本库集中存放在中央服务器--要先从中央服务器取得最新的版本，修改后再推送给中央服务器。
+最大的问题是必须联网才能工作（可能网速慢）。
+开源且免费的SVN是目前用得最多的集中式版本库控制系统。
+分布式
+没有“中央服务器”--每个人的电脑上都是一个完整的版本库，工作时不需要联网。
+可多人协作--只需把各自的修改推送给对方，就可以互相看到对方的修改了。
+在实际使用时，很少在两人之间的电脑上推送版本库的修改（可能不在一个局域网内两台电脑互相访问不了/对方电脑没有开机）。分布式版本控制系统通常也有一台充当“中央服务器”的电脑，但这个服务器作用仅仅是方便“交换”大家的修改，没有它大家也一样干活，只是交换修改不方便而已。
+
+
+安装Git
+Linux
+输入git，查看系统有没有安装Git。
+Debian或Ubuntu Linux：sudo apt-get install git
+老一点的Debian或Ubuntu Linux：sudo apt-get install git-core
+其他Linux版本：直接通过源码安装。先从Git官网下载源码，解压，依次输入：./config，make，sudo make install这几个命令安装。
+
+Windows
+从Git官网下载安装程序（https://git-scm.com/downloads），按默认选项安装即可。
+安装完成后，在开始菜单里找到“Git”->“Git Bash”，蹦出一个类似命令行窗口的东西，就说明Git安装成功。
+安装完成后，还需要最后一步设置，在命令行输入：
+git config --global user.name "Your Name"
+git config --global user.email email@example.com
+因为Git是分布式版本控制系统，所以，每个机器都必须自报家门：你的名字和Email地址。
+注意git config命令的--global参数，表示这台机器上所有的Git仓库都会使用这个配置。当然也可以对某个仓库指定不同的用户名和Email地址。
+
+
+创建版本库（仓库）
+①创建一个空目录：
+mkdir learngit
+cd learngit
+pwd             --显示当前目录
+！如果使用Windows系统，为了避免遇到各种莫名其妙的问题，请确保目录名（包括父目录）不包含中文。
+②通过git init把这个目录变成Git可以管理的仓库。
+此时当前目录下多了一个.git的目录，这个目录是Git来跟踪管理版本库的，没事千万不要手动修改这个目录里面的文件。
+如果没有看到.git目录，是因为这个目录默认是隐藏的，用ls -ah命令就可以看见。
+不一定必须在空目录下创建Git仓库。
+
+把文件添加到版本库
+所有的版本控制系统，只能跟踪文本文件的改动（TXT文件，网页，所有的程序代码等等），没法跟踪Word文件的改动。
+强烈建议使用标准的UTF-8编码，所有语言使用同一种编码，既没有冲突，又被所有平台所支持。
+使用Windows要特别注意：千万不要使用Windows自带的记事本编辑任何文本文件。建议下载Visual Studio Code代替记事本，不但功能强大，而且免费！
+
+编写一个readme.txt文件，一定要放到learngit目录下
+①git add <file>，把文件添加到仓库：
+git add readme.txt
+②git commit -m <message>，把文件提交到仓库：
+git commit -m "wrote a readme file"
+-m后面输入的是本次提交的说明，可以输入任意内容，最好是有意义的，这样就能从历史记录里方便地找到改动记录。
+
+commit可以一次提交很多文件：
+git add file1.txt
+git add file2.txt file3.txt
+git commit -m "add 3 files."
+
+修改readme.txt
+git status可以让我们时刻掌握工作区的状态
+git diff查看具体修改了什么内容：
+git diff readme.txt
+提交修改和提交新文件是同样的两步--git add与git commit
+
+版本回退
+git log命令查看提交历史
+如果嫌输出信息太多，看得眼花缭乱，可以加上--pretty=oneline参数：
+git log --pretty=oneline
+在Git中，HEAD表示当前版本，上一个版本是HEAD^，上上一个版本是HEAD^^，往上100个版本写成HEAD~100。
+版本回退到上一个版本，用git reset命令：
+git reset --hard HEAD^
+查看readme.txt的内容：
+cat readme.txt
+回到新版本：
+①若上面的命令行窗口还没有被关掉，可以找到那个版本的commit id（1094adb...），指定回到未来的某个版本：
+git reset --hard 1094a           --版本号写前几位就可以了
+②找不到新版本的commit id：
+git reflog用来记录你的每一次命令，可找到commit id
+
+工作区和暂存区
+工作区--在电脑里能看到的目录
+版本库--工作区中一个隐藏目录.git
+Git的版本库里存了很多东西，其中最重要的就是称为stage（或者叫index）的暂存区，还有Git为我们自动创建的第一个分支master，以及指向master的一个指针叫HEAD。
+把文件往Git版本库里添加的时候：
+git add实际上就是把文件修改添加到暂存区；
+git commit实际上就是把暂存区的所有内容提交到当前分支。
+--需要提交的文件修改通通放到暂存区，然后，一次性提交暂存区的所有修改（暂存区就没有任何内容了）。
+
+管理修改
+Git跟踪并管理的是修改，而非文件。
+git diff HEAD -- readme.txt命令可以查看工作区和版本库里面最新版本的区别。
+如何提交第二次修改：
+①提交第一次修改后继续git add再git commit；
+②直接git add第二次修改，再git commit，相当于把两次修改合并后一块提交。
+
+撤销修改
+修改工作区文件：
+对文件进行修改，手动把文件恢复到上一个版本的状态。
+丢弃工作区的修改，把readme.txt文件在工作区的修改全部撤销，让这个文件回到最近一次git commit或git add时的状态：
+git checkout -- readme.txt     --！‘--’很重要
+在commit之前，修改暂存区的错误：
+把暂存区的修改撤销掉（unstage），重新放回工作区：
+git reset HEAD readme.txt     --HEAD表示最新的版本
+现在暂存区是干净的，工作区有修改。
+在把自己的本地版本库推送到远程库之前，修改版本库中的错误：
+版本回退至上一个版本
+
+删除文件
+直接在文件管理器中把没用的文件删了，或者用rm命令删了：
+rm test.txt
+Git知道你删除了文件，工作区和版本库不一致，git status命令会立刻告诉你哪些文件被删除了
+①若确实要从版本库中删除该文件，用命令git rm删掉，并且git commit：
+git rm test.txt
+git commit -m "remove test.txt"
+②若删错了，因为版本库里还有，所以可以把误删的文件恢复到最新版本：
+git checkout -- test.txt
+git checkout其实是用版本库里的版本替换工作区的版本，无论工作区是修改还是删除，都可以“一键还原”。
+
+
+远程仓库
+GitHub这个网站就是提供Git仓库托管服务的，只要注册一个GitHub账号，就可以免费获得Git远程仓库。
+注册GitHub账号。由于本地Git仓库和GitHub仓库之间的传输是通过SSH加密的，所以，需要一点设置：
+①创建SSH Key。在用户主目录下，看看有没有.ssh目录：
+如果有，再看看这个目录下有没有id_rsa和id_rsa.pub这两个文件。这两个就是SSH Key的秘钥对，id_rsa是私钥，不能泄露出去；id_rsa.pub是公钥，可以告诉任何人。如果已经有了，可直接跳到下一步。
+如果没有，打开Shell（Windows下打开Git Bash），创建SSH Key：
+ssh-keygen -t rsa -C "youremail@example.com"
+②登陆GitHub，打开“Account settings”，“SSH Keys”页面，然后，点“Add SSH Key”，填上任意Title，在Key文本框里粘贴id_rsa.pub文件的内容。
+GitHub需要SSH Key来识别出你推送的提交确实是你推送的，而不是别人冒充的。
+GitHub允许添加多个Key。只要把每台电脑的Key都添加到GitHub，就可以在每台电脑上往GitHub推送了。
+
+添加远程库
+已在本地创建了一个Git仓库后，又想在GitHub创建一个Git仓库，并且让这两个仓库进行远程同步，这样，GitHub上的仓库既可以作为备份，又可以让其他人通过该仓库来协作。
+登陆GitHub，然后，在右上角找到“Create a new repo”按钮，创建一个新的仓库。
+目前，在GitHub上的这个learngit仓库还是空的，可以从这个仓库克隆出新的仓库，也可以把一个已有的本地仓库与之关联，然后，把本地仓库的内容推送到GitHub仓库。
+
+关联远程库
+在本地的learngit仓库下运行命令：
+git remote add origin git@github.com:michaelliao/learngit.git    --把michaelliao替换成自己的GitHub账户名
+远程库的名字就是origin
+
+把本地库的所有内容推送到远程库上：
+git push -u origin master        --实际上是把当前分支master推送到远程
+由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令。
+之后，本地作了提交后，可以通过命令：
+git push origin master
+把本地master分支的最新修改推送至GitHub
+
+删除远程库
+git remote -v查看远程库信息
+git remote rm <name>命令：
+此处的“删除”其实是解除了本地和远程的绑定关系，并不是物理上删除了远程库。远程库本身并没有任何改动。要真正删除远程库，需要登录到GitHub，在后台页面找到删除按钮再删除。
+
+从远程库克隆
+先创建一个远程仓库，用命令git clone克隆一个本地库：
+git clone git@github.com:michaelliao/gitskills.git
+还可以用https://github.com/michaelliao/gitskills.git这样的地址。
+
+
+分支管理
+创建与合并分支
+每次提交，Git都把它们串成一条时间线，这条时间线就是一个分支。
+HEAD严格来说不是指向提交，而是指向master，master指向提交。因此，HEAD指向的就是当前分支。
+一开始，master分支是一条线，Git用master指向最新的提交，再用HEAD指向master，就能确定当前分支，以及当前分支的提交点；
+当创建新的分支，例如dev时，Git新建了一个指针叫dev，指向master相同的提交，再把HEAD指向dev，就表示当前分支在dev上；
+此后，对工作区的修改和提交就是针对dev分支了。
+
+当在dev上的工作完成了，就可以把dev合并到master上。
+合并最简单的方法，就是直接把master指向dev的当前提交。
+合并完后，可以删除dev分支。
+删除dev分支就是把dev指针给删掉，删掉后，就剩下了一条master分支。
+
+创建dev分支，然后切换到dev分支：
+git checkout -b dev
+相当于以下两条命令：
+git branch dev
+git checkout dev
+git branch命令会列出所有分支，当前分支前面会标一个*号。
+切换回master分支：
+git checkout master
+把dev分支的工作成果合并到master分支上：
+git merge dev     --git merge命令用于合并指定分支到当前分支。
+删除dev分支：
+git branch -d dev
+Git鼓励你使用分支完成某个任务，合并后再删掉分支，这和直接在master分支上工作效果是一样的，但过程更安全。
+
+switch
+最新版本的Git提供了新的git switch命令来切换分支：
+创建并切换到新的dev分支：
+git switch -c dev
+切换到已有的master分支：
+git switch master
+
+解决冲突
+master分支和feature1分支各自都分别有新的提交，这种情况下，Git无法执行“快速合并”，只能试图把各自的修改合并起来。但这种合并就可能会有冲突，必须手动解决冲突后再提交。
+git status可以显示冲突的文件。
+查看readme.txt的内容，Git用<<<<<<<，=======，>>>>>>>标记出不同分支的内容。
+用带参数的git log也可以看到分支的合并情况：
+git log --graph --pretty=oneline --abbrev-commit
+git log --graph命令可以看到分支合并图。
+
+分支管理策略
+通常，合并分支时，如果可能，Git会用Fast forward模式。但这种模式下，删除分支后，会丢掉分支信息。
+如果要强制禁用Fast forward模式，Git会在merge时生成一个新的commit。这样，从分支历史上就可以看出分支信息。
+
+切换回master，合并dev分支：
+git merge --no-ff -m "merge with no-ff" dev
+--no-ff参数，表示禁用Fast forward。
+因为本次合并要创建一个新的commit，所以加上-m参数，把commit描述写进去。
+
+分支策略
+在实际开发中，分支管理几个基本原则：
+master分支应该是非常稳定的，也就是仅用来发布新版本，平时不能在上面干活；
+干活都在dev分支上，也就是说，dev分支是不稳定的，到某个时候，比如1.0版本发布时，再把dev分支合并到master上，在master分支发布1.0版本；
+你和你的小伙伴们每个人都在dev分支上干活，每个人都有自己的分支，时不时地往dev分支上合并就可以了。
+
+Bug分支
+每个bug都可以通过一个新的临时分支来修复，修复后，合并分支，然后将临时分支删除。
+①若想修复其他分支上的bug，但当前正在dev上进行的工作还没有提交：
+git stash可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作。
+②创建分支来修复bug，要确定在哪个分支上修复bug。假定需要在master分支上修复，就从master创建临时分支：
+git checkout master
+git checkout -b issue-101
+③修复bug，然后提交（提交后会有[issue-101 4c805e2]）。
+④修复完成后，切换到master分支，并完成合并，最后删除issue-101分支。
+⑤回到dev分支干活。
+⑥恢复现场有两个办法：
+一是用git stash apply恢复。恢复后，stash内容需要用git stash drop来删除；
+二是用git stash pop，恢复的同时把stash内容也删了。
+可以多次stash，恢复的时候，先用git stash list查看，然后恢复指定的stash：
+git stash apply stash@{0}
+
+在master分支上修复了bug后，由于dev分支是早期从master分支分出来的，所以，这个bug其实在当前dev分支上也存在。
+在dev分支上修复同样的bug，只需要把4c805e2 fix bug 101这个提交所做的修改“复制”到dev分支。
+cherry-pick能复制一个特定的提交到当前分支：
+git cherry-pick 4c805e2
+Git自动给dev分支做了一次提交
+直接在dev分支上修复bug，然后在master分支上“重放”也可以，不过仍然需要git stash命令保存现场，才能从dev分支切换到master分支。
+
+Feature分支
+软件开发中，每添加一个新功能，最好新建一个feature分支，在上面开发，完成后合并，最后删除该feature分支。
+如果要丢弃一个没有被合并过的分支，可以通过git branch -D <name>强行删除：
+git branch -d feature-vulcan
+销毁失败。Git提醒feature-vulcan分支还没有被合并，如果删除，将丢失掉修改。
+强行删除：
+git branch -D feature-vulcan
+
+
+多人协作
+git remote查看远程库的信息
+git remote -v显示更详细的信息--显示了可以抓取和推送的origin的地址。如果没有推送权限，就看不到push的地址。
+
+推送分支
+把该分支上的所有本地提交推送到远程库。
+git push origin master
+如果要推送其他分支（dev），就改成：git push origin dev
+并不一定要把本地分支往远程推送：
+master分支是主分支，要时刻与远程同步；
+dev分支是开发分支，团队所有成员都需要在上面工作，也需要与远程同步；
+bug分支只用于在本地修复bug，没必要推到远程；
+feature分支是否推到远程，取决于你是否和伙伴合作在上面开发。
+总之，在Git中，分支完全可以在本地自己藏着玩，是否推送，视你的心情而定。
+
+抓取分支
+当你的小伙伴从远程库clone时（git clone git@github.com:michaelliao/learngit.git），默认只能看到本地的master分支。
+要在dev分支上开发，就必须创建远程origin的dev分支到本地。
+创建本地dev分支（本地和远程分支的名称最好一致）：
+git checkout -b dev origin/dev
+此后，他就可以在dev上继续修改，然后，时不时地把dev分支push到远程（add commit push）
+
+你的小伙伴已经向origin/dev分支推送了他的提交，而碰巧你也对同样的文件作了修改，并试图推送；
+推送失败，因为你的小伙伴的最新提交和你试图推送的提交有冲突。
+解决办法：用git pull把最新的提交从origin/dev抓下来，然后在本地合并，解决冲突，再推送。
+git pull失败，可能原因是没有指定本地dev分支与远程origin/dev分支的链接。设置dev和origin/dev的链接：
+git branch --set-upstream-to=origin/dev dev
+再git pull，成功，但是合并有冲突，需要手动解决。解决的方法和分支管理中的解决冲突完全一样。解决后，提交，再push。
+
+Rebase
+提交历史分叉时，把本地分支push到远程，不好看：
+git rebase
+rebase操作可以把本地未push的分叉提交历史整理成直线。
+Git把我们本地的提交“挪动”了位置。最终的提交内容是一致的，但本地的commit修改内容变化了。
+rebase的目的是使得我们在查看历史提交的变化时更容易，因为分叉的提交需要三方对比。
+
+
+标签管理
+在版本库中打一个标签（tag），就唯一确定了打标签时刻的版本。将来取某个标签的版本，就是把那个打标签的时刻的历史版本取出来。
+标签其实就是指向某个commit的指针（跟分支很像，但分支可以移动，标签不能移动）。
+tag就是一个让人容易记住的有意义的名字，它跟某个commit绑在一起。
+
+创建标签
+切换到需要打标签的分支上，然后git tag <name>：
+git tag v1.0
+查看所有标签：
+git tag       --标签按字母排序
+默认标签是打在最新提交的commit上的。
+为历史提交打标签需找到历史提交的commit id：
+git log --pretty=oneline --abbrev-commit
+git tag v0.9 f52c633
+可以创建带有说明的标签，用-a指定标签名，-m指定说明文字：
+git tag -a v0.1 -m "version 0.1 released" 1094adb
+git show <tagname>查看标签信息：
+git show v0.9
+标签总是和某个commit挂钩。如果这个commit既出现在master分支，又出现在dev分支，那么在这两个分支上都可以看到这个标签。
+
+操作标签
+删除本地标签：
+git tag -d v0.1
+推送标签到远程：
+git push origin v1.0
+一次性推送全部尚未推送到远程的本地标签：
+git push origin --tags
+删除远程标签：
+git tag -d v0.9   --先从本地删除
+git push origin :refs/tags/v0.9    --从远程删除
+
+
+使用GitHub
+上传个人的开源项目、让别人参与你的开源项目、参与别人的开源项目。
+参与一个开源项目：
+①访问项目主页（https://github.com/twbs/bootstrap），点“Fork”，在自己的账号下克隆一个bootstrap仓库：
+git clone git@github.com:michaelliao/bootstrap.git
+②往自己的仓库推送想修复的一个bug，或者新增一个功能。
+③在GitHub上发起一个pull request，以期bootstrap的官方库能接受你的修改。
+
+
+使用Gitee
+国内的Git托管服务。
+Gitee的免费版本提供私有库功能，有5人的成员上限。
+注册账号并登录后，需要先上传自己的SSH公钥（用户主目录下的.ssh/id_rsa.pub文件）。
+
+将已有的一个本地git仓库关联到Gitee的远程库上：
+在Gitee上创建一个新的项目，项目名称最好与本地库保持一致；
+在本地库上使用命令git remote add把它和Gitee的远程库关联：
+git remote add origin git@gitee.com:liaoxuefeng/learngit.git
+如果在git remote add时报错：
+fatal: remote origin already exists.
+说明本地库已经关联了一个名叫origin的远程库。可以先用git remote -v查看远程库信息，删除已有的GitHub远程库，再关联Gitee的远程库。
+一个本地库可以既关联GitHub，又关联Gitee。如果有多个远程库，需要用不同的名称来标识不同的远程库。
+Gitee也同样提供了Pull request功能
+
+
+自定义Git
+让Git显示颜色，让命令输出更醒目：
+git config --global color.ui true
+忽略特殊文件、配置别名、搭建Git服务器
+
+
+使用SourceTree
+GUI工具，Git的图形界面工具。
+
